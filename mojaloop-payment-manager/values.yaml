@@ -12,20 +12,20 @@ imagePullCredentials: &imagePullCredentials
 experienceApiClientSecret: &experienceApiClientSecret "somesecret"
 
 # set both these to the external URL of the UI itself
-frontendRootUrl: &frontendRootUrl "http://portal.external.url:1234/"
-frontendBaseUrl: &frontendBaseUrl "http://experience-api.external.url:1234/"
+frontendRootUrl: &frontendRootUrl "http://portal.external.url:1234/" ### Folarin: This is the url of the UI in ../pm4ml-ui
+frontendBaseUrl: &frontendBaseUrl "http://experience-api.external.url:1234/" ### Folarin: This is the url of the Experience API in ../pm4ml-experience-api, its also a subcomponent below.
 
 # this needs to have external URLs of both the UI and experience API
 frontendRedirectUris: &frontendRedirectUris
   - "http://portal.external.url:1234/*"
-  - "http://experience-api.external.url/*"
+  - "http://experience-api.external.url/*" ### Folarin: Same as above but ends in /* for valid redirects.
 
 # this _should_ be set to only allow requests from known origins
 frontendWebOrigins: &frontendWebOrigins
   - "*"
 
 # this should be set to the FSPID assigned by the mojaloop hub to this DFSP
-dfspId: &dfspId "pm4mldfsp"
+dfspId: &dfspId "pm4mldfsp" ### Folarin: This is the FSPID of the DFSP we are currently using
 
 # the test ingress exposes four internal endpoints used for test automation
 # on a single ingress. if this is enabled you must provide real values for the
@@ -52,7 +52,7 @@ frontend:
   imagePullCredentials: *imagePullCredentials
   env:
     # this should be set to the external URL of the experience API
-    API_BASE_URL: "http://experience-api.external.url:30095"
+    API_BASE_URL: "http://experience-api.external.url:30095" ### Folarin: Same experience api url.
   ingress:
     enabled: true
     annotations:
@@ -103,11 +103,11 @@ management-api:
     #    CLIENT_SECRET_KEY: changeme
     CACHE_HOST: redis-master
     DFSP_ID: *dfspId
-    HUB_IAM_PROVIDER_URL: https://change.me
-    MCM_SERVER_ENDPOINT: http://mcm-server
+    HUB_IAM_PROVIDER_URL: https://change.me ### Folarin: This is very likely a keycloak base url.
+    MCM_SERVER_ENDPOINT: http://mcm-server ### This is mojaloop connection manager server url. Not sure if it exists in this chart or needs to be deployed seperately.
     MCM_CLIENT_REFRESH_INTERVAL: 300
     AUTH_ENABLED: true
-    AUTH_CLIENT_ID: change-me_oidc
+    AUTH_CLIENT_ID: change-me_oidc ### Folarin: This and below is the client id/secret of the keycloak client. We can probably use our keycloak instance.
     AUTH_CLIENT_SECRET: change-me_oidc
     VAULT_ENDPOINT: http://vault:8200
     VAULT_AUTH_METHOD: K8S
@@ -243,18 +243,18 @@ scheme-adapter:
       # SWITCH ENDPOINT
       # The option 'PEER_ENDPOINT' has no effect if the remaining options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT',
       # 'BULK_QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT', 'BULK_TRANSFERS_ENDPOINT', 'TRANSACTION_REQUESTS_ENDPOINT' are specified.
-      PEER_ENDPOINT: mojaloop.hub.external.fspiop.endpoint:1234
+      PEER_ENDPOINT: mojaloop.hub.external.fspiop.endpoint:1234 ### Folarin: Not sure what this is but we can specify the others.
 
       ### Set each Mojaloop Switch endpoint service individually
-      ALS_ENDPOINT: ""
-      QUOTES_ENDPOINT: ""
+      ALS_ENDPOINT: "" ### Folarin: https://ml-als.upi.dev
+      QUOTES_ENDPOINT: "" ### Folarin: https://ml-quotes.upi.dev
       BULK_QUOTES_ENDPOINT: ""
-      TRANSACTION_REQUESTS_ENDPOINT: ""
-      TRANSFERS_ENDPOINT: ""
+      TRANSACTION_REQUESTS_ENDPOINT: "" ### Folarin: Currently dont have access to this endpoint. The bulk ones can safely be left empty.
+      TRANSFERS_ENDPOINT: "" ### Folarin: https://ml-transfer.upi.dev
       BULK_TRANSFERS_ENDPOINT: ""
 
       # BACKEND ENDPOINT
-      BACKEND_ENDPOINT: mojaloop-simulator-core-connector:3003
+      BACKEND_ENDPOINT: mojaloop-simulator-core-connector:3003 ### Folarin: This is the core connector url. Use an empty port or just route it to our afropay-svc.
 
       # FSPID of this DFSP
       DFSP_ID: "{{ .Values.config.simName }}"
@@ -1596,8 +1596,8 @@ mojaloop-core-connector:
   imagePullCredentials: *imagePullCredentials
   enabled: true
   env:
-    BACKEND_ENDPOINT: http://pm4ml-mojaloop-simulator:3000
-    MLCONN_OUTBOUND_ENDPOINT: http://scheme-adapter:4001
+    BACKEND_ENDPOINT: http://pm4ml-mojaloop-simulator:3000 ### Folarin: This payment manager comes with a core-connector which we would not be using. Leave as is.
+    MLCONN_OUTBOUND_ENDPOINT: http://scheme-adapter:4001 ### Folarin: This is the endpoint for the scheme-adapter. This might not need to be changed.
 
   image:
     repository: pm4ml/mojaloop-payment-manager-simulator-core-connector
@@ -1749,9 +1749,9 @@ ttk:
         ui:
           host: pm4ml-testing-toolkit.local
     config:
-      API_BASE_URL: http://pm4ml-testing-toolkit.local
+      API_BASE_URL: http://pm4ml-testing-toolkit.local ### Folarin: .local ???
 
-keycloak:
+keycloak: ### Folarin: If keycloak is deployed here, we should probably just use this instead of ours?
   enabled: true
 
   extraVolumes: |
@@ -1822,7 +1822,7 @@ keycloak:
     #       paths:
     #         - /auth/admin/
 
-  configFiles:
+  configFiles: ### Folarin: This is keycloak realm configuration. Nothing to see here.
     realm.json: |
       {
         "id": "pm4ml",
